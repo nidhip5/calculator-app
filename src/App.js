@@ -106,9 +106,9 @@ const App = () => {
     let res = calc.res ? parseFloat(removeSpaces(calc.res)) : 0;
     setCalc({
       ...calc,
-      sign: "",
       num: (num /= Math.pow(100, 1)),
       res: (res /= Math.pow(100, 1)),
+      sign: "",
     });
   };
 
