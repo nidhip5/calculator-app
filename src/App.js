@@ -5,12 +5,17 @@ import ButtonBox from "./components/ButtonBox";
 import Button from "./components/Button";
 
 const btnValues = [
+  // a 2 dimensional array
   ["C", "+-", "%", "/"],
   [7, 8, 9, "X"],
   [4, 5, 6, "-"],
   [1, 2, 3, "+"],
   [0, ".", "="],
 ];
+const toLocaleString = (num) =>
+  String(num).replace(/(?<!\..*)(\d)(?=(?:\d{3})+(?:\.|$))/g, "$1 ");
+const removeSpaces = (num) => num.toString().replace(/\s/g, "");
+
 const App = () => {
   let [calc, setCalc] = useState({
     sign: "",
@@ -18,17 +23,17 @@ const App = () => {
     res: 0,
   });
   const numClickHandler = (e) => {
-    if (calc.num.length < 16) {
-      e.preventDefault();
-      const value = e.target.innerHtml;
+    e.preventDefault();
+    const value = e.target.innerHtml;
+    if (removeSpaces(calc.num).length < 16) {
       setCalc({
         ...calc,
         num:
-          calc.num.value == 0 && value == "0"
+          calc.num === 0 && value === "0"
             ? "0"
-            : calc.num.value % 1 == 0
-            ? Number(calc.num.value + value)
-            : calc.num.value + value,
+            : removeSpaces(calc.num) % 1 === 0
+            ? toLocaleString(Number(removeSpaces(calc.num) + value))
+            : toLocaleString(calc.num + value),
         res: !calc.sign ? 0 : calc.res,
       });
     }
@@ -36,13 +41,11 @@ const App = () => {
   const commaClickHandler = (e) => {
     e.preventDefault();
     const value = e.target.value;
-    if (calc.num) {
-      setCalc({
-        ...calc,
-        num: !calc.num.toString.includes(".") ? calc.num + value : calc.num,
-        // !cal.num.toString.includes(.) checks whether cal.num (converted to string) includes a decimal or not. if not then it will add current num value with exising value or else it will simply keep existing num value. meaning the comma button doesnt have any behavior.
-      });
-    }
+    setCalc({
+      ...calc,
+      num: !calc.num.toString.includes(".") ? calc.num + value : calc.num,
+      // !cal.num.toString.includes(.) checks whether cal.num (converted to string) includes a decimal or not. if not then it will add current num value with exising value or else it will simply keep existing num value. meaning the comma button doesnt have any behavior.
+    });
   };
   const signClickHandler = (e) => {
     e.preventDefault();
@@ -54,71 +57,84 @@ const App = () => {
       num: 0,
     });
   };
-  const equalsClickHandler = (e) => {
-    e.preventDefault();
-    if (calc.num && calc.sign) {
-      const math = (a, b, sign) => {
-        sign == "+" ? a + b : sign == "-" ? a - b : sign == "X" ? a * b : a / b;
-      };
+  const equalsClickHandler = () => {
+    if (calc.sign && calc.num) {
+      // since it is a single expression so we defined arrow function with no curly braces
+      const math = (a, b, sign) =>
+        sign === "+"
+          ? a + b
+          : sign === "-"
+          ? a - b
+          : sign === "X"
+          ? a * b
+          : a / b;
       setCalc({
-        ...cal,
-        num: "0", //The num property is set to 0, potentially indicating that the user is starting a new number entry after the calculation.
-        sign: "", // The sign property is set to an empty string, indicating that the previous operator has been used for calculation.
+        ...calc,
         res:
-          calc.num == 0 && calc.sign == "/"
+          calc.num === "0" && calc.sign === "/"
             ? "Can't divide by 0"
-            : math(Number(calc.num), Number(calc.res), calc.sign),
+            : toLocaleString(
+                math(
+                  Number(removeSpaces(calc.num)),
+                  Number(removeSpaces(calc.res)),
+                  calc.sign
+                )
+              ),
+        sign: "", // The sign property is set to an empty string, indicating that the previous operator has been used for calculation.
+        num: 0, //The num property is set to 0, potentially indicating that the user is starting a new number entry after the calculation.
       });
     }
   };
   const invertClickHandler = () => {
     setCalc({
       ...calc,
-      num: calc.num ? calc.num * -1 : calc.num,
-      res: calc.res ? calc.res * -1 : calc.res,
+      num: calc.num ? toLocaleString(calc.num * -1) : 0,
+      res: calc.res ? toLocaleString(calc.res * -1) : 0,
       sign: "",
     });
   };
   const resetClickHandler = () => {
     setCalc({
       ...calc,
-      res: 0,
-      num: 0,
       sign: "",
+      num: 0,
+      res: 0,
     });
   };
   const percentageClickHandler = () => {
-    let num = calc.num ? parseFloat(calc.num) : 0;
-    let res = calc.res ? parseFloat(calc.res) : 0;
+    let num = calc.num ? parseFloat(removeSpaces(calc.num)) : 0;
+    let res = calc.res ? parseFloat(removeSpaces(calc.res)) : 0;
     setCalc({
       ...calc,
+      sign: "",
       num: (num /= Math.pow(100, 1)),
       res: (res /= Math.pow(100, 1)),
-      sign: "",
     });
   };
+
   return (
     <Wrapper>
       <Screen value={calc.num ? calc.num : calc.res} />
       <ButtonBox>
+        {/* to convert 2d array into single array we use flattened array that is flat() array */}
         {btnValues.flat().map((btn, index) => {
           return (
             <Button
+              key={index}
               className={btn === "=" ? "equals" : ""}
               value={btn}
-              key={index}
               onClick={
-                btn == "C"
+                btn === "C"
                   ? resetClickHandler
-                  : btn == "%"
+                  : btn === "%"
                   ? percentageClickHandler
-                  : btn == "/" || btn == "+" || btn == "-" || btn == "X"
+                  : btn === "/" || btn === "+" || btn === "-" || btn === "X"
                   ? signClickHandler
-                  : btn == "="
+                  : btn === "="
                   ? equalsClickHandler
-                  : btn == "."
+                  : btn === "."
                   ? commaClickHandler
-                  : btn == "+-"
+                  : btn === "+-"
                   ? invertClickHandler
                   : numClickHandler
               }
