@@ -12,8 +12,12 @@ const btnValues = [
   [1, 2, 3, "+"],
   [0, ".", "="],
 ];
+
+// Essentially what it does is take a number, format it into the string format and create the space separators for the thousand mark.
 const toLocaleString = (num) =>
   String(num).replace(/(?<!\..*)(\d)(?=(?:\d{3})+(?:\.|$))/g, "$1 ");
+
+// If we reverse the process and want to process the string of numbers, first we need to remove the spaces, so we can later convert it to number. For that, you can use this function:
 const removeSpaces = (num) => num.toString().replace(/\s/g, "");
 
 const App = () => {
