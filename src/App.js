@@ -24,7 +24,7 @@ const App = () => {
   });
   const numClickHandler = (e) => {
     e.preventDefault();
-    const value = e.target.innerHtml;
+    const value = e.target.innerHTML;
     if (removeSpaces(calc.num).length < 16) {
       setCalc({
         ...calc,
@@ -32,7 +32,7 @@ const App = () => {
           calc.num === 0 && value === "0"
             ? "0"
             : removeSpaces(calc.num) % 1 === 0
-            ? toLocaleString(Number(removeSpaces(calc.num) + value))
+            ? toLocaleString(Number(removeSpaces(calc.num + value)))
             : toLocaleString(calc.num + value),
         res: !calc.sign ? 0 : calc.res,
       });
@@ -40,7 +40,7 @@ const App = () => {
   };
   const commaClickHandler = (e) => {
     e.preventDefault();
-    const value = e.target.value;
+    const value = e.target.innerHTML;
     setCalc({
       ...calc,
       num: !calc.num.toString.includes(".") ? calc.num + value : calc.num,
@@ -49,7 +49,7 @@ const App = () => {
   };
   const signClickHandler = (e) => {
     e.preventDefault();
-    const value = e.target.value;
+    const value = e.target.innerHTML;
     setCalc({
       ...calc,
       sign: value,
